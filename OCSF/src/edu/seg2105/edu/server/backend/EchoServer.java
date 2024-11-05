@@ -4,6 +4,9 @@ package edu.seg2105.edu.server.backend;
 // license found at www.lloseng.com 
 
 
+import java.io.IOException;
+
+import edu.seg2105.client.ui.ServerConsole;
 import ocsf.server.*;
 
 /**
@@ -71,6 +74,12 @@ public class EchoServer extends AbstractServer
     System.out.println
       ("Server has stopped listening for connections.");
   }
+
+  public void handleMessageFromServer(Object msg) {
+    System.out.println("SERVER MSG: " + msg);
+    this.sendToAllClients("SERVER MSG: " + msg); 
+}
+
   
   
   //Class methods ***************************************************
@@ -105,6 +114,65 @@ public class EchoServer extends AbstractServer
     {
       System.out.println("ERROR - Could not listen for clients!");
     }
+
+    ServerConsole console = new ServerConsole(port, sv);
+    console.accept(); 
+
+  }
+  
+  public void handleMessageFromServerConsole(String message) {
+	  if (message.startsWith("#")) {
+		  String[] parameters = message.split(" ");
+		  String command = parameters[0];
+		  switch (command) {
+		  	case "#quit":
+		  		try {
+		  			this.close();
+		  		} catch (IOException e) {
+		  			System.exit(1);
+		  		}
+		  		System.exit(0);
+		  		break;
+		  	case "#stop":
+		  		this.stopListening();
+		  		break;
+		  	case "#close":
+		  		try {
+		  			this.close();
+		  		} catch (IOException e) {
+		  			//error closing
+		  		}
+		  		break;
+		  	case "#setport":
+		  		if (!this.isListening() && this.getNumberOfClients() < 1) {
+		  			super.setPort(Integer.parseInt(parameters[1]));
+		  			System.out.println("Port set to " +
+		  					Integer.parseInt(parameters[1]));
+		  		} else {
+		  			System.out.println("Can't do that now. Server is connected.");
+		  		}
+		  		break;
+          		  	case "#start":
+		  		if (!this.isListening()) {
+		  			try {
+		  				this.listen();
+		  			} catch (IOException e) {
+		  				//error listening for clients
+		  			}
+		  		} else {
+		  			System.out.println("We are already started and listening for clients!.");
+		  		}
+		  		break;
+		  	case "#getport":
+		  		System.out.println("Current port is " + this.getPort());
+		  		break;
+		  	default:
+		  		System.out.println("Invalid command: '" + command+ "'");
+		  		break;
+		  }
+	  } else {
+		  this.sendToAllClients(message);
+	  	}
   }
 
   
@@ -131,6 +199,8 @@ public class EchoServer extends AbstractServer
 		ConnectionToClient client) {
       System.out.println("client Disconnected");
     }
+  
 
 }
+
 //End of EchoServer class

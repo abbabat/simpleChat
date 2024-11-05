@@ -62,7 +62,7 @@ public class ChatClient extends AbstractClient
   {
     clientUI.display(msg.toString());
     
-    
+
   }
 
   /**
