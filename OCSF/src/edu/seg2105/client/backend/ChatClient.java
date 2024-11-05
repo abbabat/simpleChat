@@ -38,6 +38,9 @@ public class ChatClient extends AbstractClient
    * @param port The port number to connect on.
    * @param clientUI The interface type variable.
    */
+
+
+
   
   public ChatClient(String host, int port, ChatIF clientUI) 
     throws IOException 
@@ -71,7 +74,12 @@ public class ChatClient extends AbstractClient
   {
     try
     {
-      sendToServer(message);
+      if (message.startsWith("#")){
+        handleCommand(message);
+      }
+      
+      else{
+        sendToServer(message);}
     }
     catch(IOException e)
     {
@@ -79,6 +87,70 @@ public class ChatClient extends AbstractClient
         ("Could not send message to server.  Terminating client.");
       quit();
     }
+  }
+
+  private void handleCommand(String command){
+    if(command.equals("#quit")){
+      quit();
+
+    }
+    else if(command.equals("#logoff")){
+      try {
+        if(isConnected()){
+
+        
+        closeConnection();}
+        else{
+          clientUI.display("error, no cient logged in" );
+
+        }
+      } catch (IOException e) {
+        clientUI.display("error" );
+      }
+    }
+    else if(command.equals("#sethost")){
+      if(!isConnected()){
+        String newHost = command.substring(9).trim();
+        clientUI.display("new host assigned");
+      setHost(newHost);}
+      else{
+        clientUI.display("client is still connected");
+      }
+
+    }
+    else if(command.equals("#setport")){
+      if(!isConnected()){
+        int newport = Integer.parseInt(command.substring(9).trim());
+        clientUI.display(("new port assigned" ));
+      setPort(newport);}
+      {
+        clientUI.display("client is still connected");
+      }
+    }
+    else if(command.equals("#login")){
+      if(!isConnected()){
+        try {
+          openConnection();
+          clientUI.display("login successfull");
+        } catch (IOException e) {
+          clientUI.display("error" );
+
+        }
+      }
+      else{
+        clientUI.display("Error");
+      }
+        }
+    else if(command.equals("#gethost")){
+      clientUI.display(getHost());
+    }
+    else if(command.equals("#getport")){
+      int integer_value = getPort();
+      clientUI.display(String.valueOf(integer_value));
+        }
+    
+
+
   }
   
   /**
