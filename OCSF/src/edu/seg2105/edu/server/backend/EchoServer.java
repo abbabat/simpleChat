@@ -26,6 +26,7 @@ public class EchoServer extends AbstractServer
    * The default port to listen on.
    */
   final public static int DEFAULT_PORT = 5555;
+  final private String loginIDKey = "loginID";
   
   //Constructors ****************************************************
   
@@ -48,12 +49,48 @@ public class EchoServer extends AbstractServer
    * @param msg The message received from the client.
    * @param client The connection from which the message originated.
    */
-  public void handleMessageFromClient
-    (Object msg, ConnectionToClient client)
-  {
-    System.out.println("Message received: " + msg + " from " + client);
-    this.sendToAllClients(msg);
+
+   private void handleLoginCommand(String message, ConnectionToClient client) throws IOException {
+    // Ensure #login is only allowed as the first command
+    if (client.getInfo(loginIDKey) != null) {
+        client.sendToClient("ERROR: You are already logged in. Connection will be closed.");
+        client.close();
+        return;
+    }
+
+    String loginID = message.substring(7).trim(); // Extract login ID
+    if (loginID.isEmpty()) {
+        client.sendToClient("ERROR: Login ID cannot be empty. Connection will be closed.");
+        client.close();
+    } else {
+        client.setInfo(loginIDKey, loginID); // Save login ID using loginIDKey
+        client.sendToClient("Login successful. Welcome, " + loginID + "!");
+        System.out.println("Client logged in with ID: " + loginID);
+    }
+}
+
+public void handleMessageFromClient(Object msg, ConnectionToClient client) {
+  String message = msg.toString();
+
+  try {
+      if (message.startsWith("#login ")) {
+          handleLoginCommand(message, client);
+      } else {
+          String loginID = (String) client.getInfo(loginIDKey); // Use loginIDKey here
+          if (loginID == null) {
+              client.sendToClient("ERROR: You must log in first using #login <loginID>");
+              client.close();
+          } else {
+              sendToAllClients(loginID + ": " + message);
+          }
+      }
+  } catch (IOException e) {
+      System.out.println("Error handling message from client: " + e.getMessage());
   }
+}
+
+
+
     
   /**
    * This method overrides the one in the superclass.  Called
@@ -182,9 +219,9 @@ public class EchoServer extends AbstractServer
 	 * @param client the connection connected to the client.
 	 */
   @Override
-	protected void clientConnected(ConnectionToClient client) {
-    System.out.println("Client connected");
-  }
+  protected void clientConnected(ConnectionToClient client) {
+    System.out.println("Client connected: " + client);
+}
 
 	/**
 	 * Impliment Hook method called each time a client disconnects.
@@ -194,11 +231,11 @@ public class EchoServer extends AbstractServer
 	 * @param client the connection with the client.
 	 */
   @Override
-
-  synchronized protected void clientDisconnected(
-		ConnectionToClient client) {
-      System.out.println("client Disconnected");
-    }
+  synchronized protected void clientDisconnected(ConnectionToClient client) {
+      String loginID = (String) client.getInfo(loginIDKey);
+      System.out.println("Client disconnected: " + (loginID != null ? loginID : "Unknown"));
+  }
+  
   
 
 }

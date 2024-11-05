@@ -28,6 +28,9 @@ public class ChatClient extends AbstractClient
    */
   ChatIF clientUI; 
 
+  private String loginID;
+
+
   
   //Constructors ****************************************************
   
@@ -42,11 +45,12 @@ public class ChatClient extends AbstractClient
 
 
   
-  public ChatClient(String host, int port, ChatIF clientUI) 
+  public ChatClient(String loginID, String host, int port, ChatIF clientUI) 
     throws IOException 
   {
     super(host, port); //Call the superclass constructor
     this.clientUI = clientUI;
+    this.loginID = loginID;
     openConnection();
   }
 
@@ -189,5 +193,17 @@ public class ChatClient extends AbstractClient
 	protected void connectionClosed() {
     clientUI.display("Connection Closed");
 	}
+
+  @Override
+protected void connectionEstablished() {
+    try {
+        sendToServer("#login " + loginID); // Send #login command with login ID
+    } catch (IOException e) {
+        clientUI.display("Error: Could not send login message to server.");
+    }
+}
+
+
+  
 }
 //End of ChatClient class
