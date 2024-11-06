@@ -64,8 +64,8 @@ public class EchoServer extends AbstractServer
         client.close();
     } else {
         client.setInfo(loginIDKey, loginID); // Save login ID using loginIDKey
-        client.sendToClient("Login successful. Welcome, " + loginID + "!");
-        System.out.println("Client logged in with ID: " + loginID);
+        client.sendToClient("#login " + loginID);
+        System.out.println("SERVER MSG> Client logged in with ID: " + loginID);
     }
 }
 
@@ -76,14 +76,14 @@ public void handleMessageFromClient(Object msg, ConnectionToClient client) {
       if (loginID == null && message.startsWith("#login ")) {
           handleLoginCommand(message, client);  // Handle login
       } else if (loginID != null) {
-          System.out.println("Message received from " + loginID + ": " + message);  // Display message
+          System.out.println("SERVER MSG> Message received from " + loginID + ": " + message);  // Display message
           sendToAllClients(loginID + ": " + message);  // Broadcast message to all clients
       } else {
-          client.sendToClient("ERROR: You must log in first using #login <loginID>");
+          client.sendToClient("SERVER MSG> ERROR: You must log in first using #login <loginID>");
           client.close();
       }
   } catch (IOException e) {
-      System.out.println("Error handling message from client: " + e.getMessage());
+      System.out.println("SERVER MSG> Error handling message from client: " + e.getMessage());
   }
 }
 
@@ -98,7 +98,7 @@ public void handleMessageFromClient(Object msg, ConnectionToClient client) {
   protected void serverStarted()
   {
     System.out.println
-      ("Server listening for connections on port " + getPort());
+      (" SERVER MSG> Server listening for connections on port " + getPort());
   }
   
   /**
@@ -108,12 +108,12 @@ public void handleMessageFromClient(Object msg, ConnectionToClient client) {
   protected void serverStopped()
   {
     System.out.println
-      ("Server has stopped listening for connections.");
+      ("SERVER MSG> Server has stopped listening for connections.");
   }
 
   public void handleMessageFromServer(Object msg) {
-    System.out.println("SERVER MSG: " + msg);
-    this.sendToAllClients("SERVER MSG: " + msg); 
+    System.out.println("SERVER MSG> " + msg);
+    this.sendToAllClients("SERVER MSG> " + msg); 
 }
 
   
@@ -148,7 +148,7 @@ public void handleMessageFromClient(Object msg, ConnectionToClient client) {
     } 
     catch (Exception ex) 
     {
-      System.out.println("ERROR - Could not listen for clients!");
+      System.out.println(" SERVER MSG> ERROR - Could not listen for clients!");
     }
 
     ServerConsole console = new ServerConsole(port, sv);
@@ -182,10 +182,10 @@ public void handleMessageFromClient(Object msg, ConnectionToClient client) {
 		  	case "#setport":
 		  		if (!this.isListening() && this.getNumberOfClients() < 1) {
 		  			super.setPort(Integer.parseInt(parameters[1]));
-		  			System.out.println("Port set to " +
+		  			System.out.println("SERVER MSG> Port set to " +
 		  					Integer.parseInt(parameters[1]));
 		  		} else {
-		  			System.out.println("Can't do that now. Server is connected.");
+		  			System.out.println("SERVER MSG> Can't do that now. Server is connected.");
 		  		}
 		  		break;
           		  	case "#start":
@@ -196,7 +196,7 @@ public void handleMessageFromClient(Object msg, ConnectionToClient client) {
 		  				//error listening for clients
 		  			}
 		  		} else {
-		  			System.out.println("We are already started and listening for clients!.");
+		  			System.out.println(" SERVER MSG> We are already started and listening for clients!.");
 		  		}
 		  		break;
 		  	case "#getport":
@@ -219,7 +219,7 @@ public void handleMessageFromClient(Object msg, ConnectionToClient client) {
 	 */
   @Override
   protected void clientConnected(ConnectionToClient client) {
-    System.out.println("Client connected: " + client);
+    System.out.println(" SERVER MSG> Client connected: " + client);
 }
 
 	/**
@@ -232,7 +232,7 @@ public void handleMessageFromClient(Object msg, ConnectionToClient client) {
   @Override
   synchronized protected void clientDisconnected(ConnectionToClient client) {
       String loginID = (String) client.getInfo(loginIDKey);
-      System.out.println("Client disconnected: " + (loginID != null ? loginID : "Unknown"));
+      System.out.println(" SERVER MSG> Client disconnected: " + (loginID != null ? loginID : "Unknown"));
   }
   
   
