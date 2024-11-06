@@ -71,23 +71,22 @@ public class EchoServer extends AbstractServer
 
 public void handleMessageFromClient(Object msg, ConnectionToClient client) {
   String message = msg.toString();
-
   try {
-      if (message.startsWith("#login ")) {
-          handleLoginCommand(message, client);
+      String loginID = (String) client.getInfo(loginIDKey);  // Get client ID if logged in
+      if (loginID == null && message.startsWith("#login ")) {
+          handleLoginCommand(message, client);  // Handle login
+      } else if (loginID != null) {
+          System.out.println("Message received from " + loginID + ": " + message);  // Display message
+          sendToAllClients(loginID + ": " + message);  // Broadcast message to all clients
       } else {
-          String loginID = (String) client.getInfo(loginIDKey); // Use loginIDKey here
-          if (loginID == null) {
-              client.sendToClient("ERROR: You must log in first using #login <loginID>");
-              client.close();
-          } else {
-              sendToAllClients(loginID + ": " + message);
-          }
+          client.sendToClient("ERROR: You must log in first using #login <loginID>");
+          client.close();
       }
   } catch (IOException e) {
       System.out.println("Error handling message from client: " + e.getMessage());
   }
 }
+
 
 
 

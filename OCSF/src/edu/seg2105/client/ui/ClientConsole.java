@@ -78,23 +78,22 @@ public class ClientConsole implements ChatIF
    */
   public void accept() 
   {
-    try
-    {
-
-      String message;
-
       while (true) 
       {
-        message = fromConsole.nextLine();
-        client.handleMessageFromClientUI(message);
+          try 
+          {
+              String message = fromConsole.nextLine();  // Read input from the console
+              client.handleMessageFromClientUI(message);  // Send the message to the server
+          } 
+          catch (Exception ex) 
+          {
+
+              break;  // Break if there’s an error to avoid infinite loop
+          }
       }
-    } 
-    catch (Exception ex) 
-    {
-      System.out.println
-        ("Unexpected error while reading from console!");
-    }
   }
+  
+  
 
   /**
    * This method overrides the method in the ChatIF interface.  It
@@ -117,39 +116,34 @@ public class ClientConsole implements ChatIF
    */
   public static void main(String[] args) 
   {
-    String loginID = "";
-    String host = "";
-    int port = 0;
-
-
-    try {
-    	loginID = args[0];
-    } 
-    catch (ArrayIndexOutOfBoundsException e) {
-    	System.err.println("No login ID provided!");
-    	System.exit(1);
-    }
-    	
-    try {
-    	host = args[1];
-    	
-    } catch (ArrayIndexOutOfBoundsException e) {
-    	host = "localhost"; 
-    	
-    }
-    try{
-    	port= Integer.parseInt(args[2]);
-    }catch(ArrayIndexOutOfBoundsException e){
-    	port=DEFAULT_PORT;  
-    }
-    catch(NumberFormatException ne) { 
-    	port=DEFAULT_PORT;
-    }
-    ClientConsole chat= new ClientConsole(loginID, host, port);
-    chat.accept();  //Wait for console data
-    
+      String loginID = "";
+      String host = "localhost";  // Default to localhost
+      int port = DEFAULT_PORT;  // Default to 5555
+  
+      // Get login ID, either from args or prompt
+      if (args.length > 0) {
+          loginID = args[0];
+      } else {
+          System.out.print("Enter login ID: ");
+          Scanner scanner = new Scanner(System.in);
+          loginID = scanner.nextLine().trim();  // Do not close this scanner
+      }
+  
+      if (loginID.isEmpty()) {
+          System.err.println("No login ID provided. Exiting.");
+          System.exit(1);
+      }
+  
+      // Parse host and port if provided
+      if (args.length > 1) host = args[1];
+      if (args.length > 2) port = Integer.parseInt(args[2]);
+  
+      // Set up the ClientConsole with correct loginID, host, and port
+      ClientConsole chat = new ClientConsole(loginID, host, port);
+      chat.accept();  // Start waiting for console input
   }
-
+  
+  
   
 }
 //End of ConsoleChat class

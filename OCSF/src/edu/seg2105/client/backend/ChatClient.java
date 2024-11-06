@@ -76,22 +76,22 @@ public class ChatClient extends AbstractClient
    */
   public void handleMessageFromClientUI(String message)
   {
-    try
-    {
-      if (message.startsWith("#")){
-        handleCommand(message);
+      try
+      {
+          if (message.startsWith("#")) {
+              handleCommand(message);  // Handle commands like #quit or #logoff
+          } else {
+              sendToServer(message); 
+          }
       }
-      
-      else{
-        sendToServer(message);}
-    }
-    catch(IOException e)
-    {
-      clientUI.display
-        ("Could not send message to server.  Terminating client.");
-      quit();
-    }
+      catch(IOException e)
+      {
+          clientUI.display("Could not send message to server. Terminating client.");
+          quit();
+      }
   }
+  
+  
 
   private void handleCommand(String command){
     if(command.equals("#quit")){
