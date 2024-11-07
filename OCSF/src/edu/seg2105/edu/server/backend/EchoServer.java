@@ -77,7 +77,7 @@ public void handleMessageFromClient(Object msg, ConnectionToClient client) {
           handleLoginCommand(message, client);  // Handle login
       } else if (loginID != null) {
           System.out.println("SERVER MSG> Message received from " + loginID + ": " + message);  // Display message
-          sendToAllClients(loginID + ": " + message);  // Broadcast message to all clients
+          sendToAllClients(loginID + "> " + message);  // Broadcast message to all clients
       } else {
           client.sendToClient("SERVER MSG> ERROR: You must log in first using #login <loginID>");
           client.close();
